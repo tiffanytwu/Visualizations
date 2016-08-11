@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Simple Stack</title>
+        <script src="https://d3js.org/d3.v4.min.js"></script>     
+        <style>
+            svg {
+                border: solid 1px #ccc;
+                font: 10px sans-serif;
+                shape-rendering: crispEdges;
+            }
+        </style>             
+    </head>
+    <body>
+
+        <div id="viz"></div>
+
+        <script type="text/javascript">
+            
+						var jsonData = [ {"Time":"1/1/15","Dark":3273405, "True":3473405, "Search":2373405, "Social":4273405, "All":3873405}, {"Time":"2/1/15","Dark":3661794, "True":3661794, "Search":3661794, "Social":3661794, "All":3661794}, {"Time":"3/1/15","Dark":3409825, "True":3009825, "Search":3009825, "Social":3009825, "All":3009825}, {"Time":"4/1/15","Dark":2434526, "True":2434526, "Search":2435526, "Social":2234526, "All":2434526}, {"Time":"5/1/15","Dark":3256876, "True":1256876, "Search":2256876, "Social":2256876, "All":2256876}, {"Time":"6/1/15","Dark":2598417, "True":2262417, "Search":2568617, "Social":2568217, "All":2568417}, {"Time":"7/1/15","Dark":3741338, "True":2741338, "Search":2741338, "Social":2341338, "All":2741338}, {"Time":"8/1/15","Dark":2856222, "True":2856222, "Search":2856522, "Social":2856222, "All":2856222}, {"Time":"9/1/15","Dark":3237909, "True":2467909, "Search":2467909, "Social":2467909, "All":2467909}, {"Time":"10/1/15","Dark":2341217, "True":2641217, "Search":2841217, "Social":2841217, "All":2841217}, {"Time":"11/1/15","Dark":2562435, "True":1523435, "Search":2562435, "Social":2564435, "All":2562435}, {"Time":"12/1/15","Dark":3235801, "True":2582301, "Search":2585801, "Social":2585801, "All":2585801}];
+
+		var margin = {top: 25, right: 20, bottom: 25, left: 20}
+		var barPadding = 2;
+		var w = 1000 - margin.left - margin.right;
+		var h = 520 - margin.top - margin.bottom;
+			var max = d3.max(jsonData, function(d) { return +d["All"];} );
+			var dynamicColor;
+			var startDate = new Date(jsonData[0].Time);
+			var endDate = new Date(jsonData[jsonData.length - 1].Time);
+
+
+		var xScale = d3.scaleTime()
+			.domain([startDate, d3.timeMonth.offset(endDate,1)])
+			.range([0, w - margin.left - margin.right]);
+
+		var yScale = d3.scaleLinear()
+			.domain([0, max])
+			.range([0, h]);
+
+		var svg = d3.select("#viz")
+			.append("svg")
+			.attr("width", w + margin.left + margin.right)
+			.attr("height", h + margin.top + margin.bottom)
+			.append("g")
+ 			.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+ 		svg.selectAll("rect")
+ 			.data(jsonData)
+ 			.enter()
+ 			.append("rect")
+ 			.attr("fill", "#6E6E6E")
+ 			.attr("width",  (w/jsonData.length)- barPadding)
+ 			.attr("height", function(d,i){
+ 			    return yScale(d["All"]);
+ 			})
+ 			.attr("x", function(d,i){
+ 				return xScale(new Date(d.Time)) + barPadding; 
+			})
+ 			.attr("y", function(d,i){
+ 				return h - yScale(d["All"]);
+ 			})
+ 			.attr("stroke", "#4D4D4D")
+				.on("mouseover", function(data) {
+	                dynamicColor = this.style.fill;
+		 		d3.select(this)
+		 			.style("fill", "#A6A6A6")
+		 			})
+		 			.on("mouseout", function(data) {
+		 		d3.select(this)
+		 			.style("fill", dynamicColor)
+ 			});
+
+		svg.selectAll("text")
+			.data(jsonData)
+ 			.enter()
+ 			.append("text")
+ 			.text(function(d) {
+ 				return Math.round(d["All"]/1000000) + "M";
+ 			})
+ 			.attr("x", function(d, i) {
+ 				return (i*xScale(new Date(d.Time)) + (i+1)*xScale(new Date(d.Time)))/(i+(i+1));
+ 			})
+ 			.attr("transform", "translate(" + (w/(jsonData.length*2)) + ",0)")
+ 			.attr("y", function(d,i) {
+ 				return h - yScale(d["All"]) + 11;
+ 			})
+ 			.attr("font-family", "sans-serif")
+ 			.attr("font-size", "11px")
+ 			.attr("fill", "white")
+ 			.attr("text-anchor", "middle");
+
+		d3.select("svg")
+			.attr("class", "axis")
+			.append("g")
+ 			.attr("transform", "translate(" + margin.left + ", " + (h + margin.top) + ")")
+				.call(d3.axisBottom(xScale)
+				.ticks(d3.timeMonth.every(3))
+				.tickFormat(d3.timeFormat("%b-%y")));
+
+ 		svg.selectAll("rect")
+ 			.exit()
+ 			.remove()
+
+
+
+
+        </script>
+    </body>
+</html>
